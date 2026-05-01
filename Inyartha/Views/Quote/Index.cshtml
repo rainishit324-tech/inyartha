@@ -1,0 +1,77 @@
+﻿@model List<Quote>
+@{
+    ViewData["Title"] = "Quotes Dashboard";
+}
+
+<div class="dashboard">
+    <div class="dashboard__header">
+        <div>
+            <div class="section__tag" style="margin-bottom:12px;">Admin Panel</div>
+            <h1>Quotes Dashboard</h1>
+        </div>
+        <a href="/Quote/Create" class="btn btn--gold btn--lg">+ New Quote</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="quotes-table-wrap">
+            <div class="empty-state">
+                <h3>No quotes yet</h3>
+                <p>Create your first client quote to get started.</p>
+                <a href="/Quote/Create" class="btn btn--gold">Create First Quote</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="quotes-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quote ID</th>
+                        <th>Client</th>
+                        <th>Project</th>
+                        <th>Budget</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var q in Model)
+                    {
+                        <tr>
+                            <td><code style="font-size:.8rem;background:var(--cream-2);padding:3px 8px;border-radius:6px;">#@q.Id</code></td>
+                            <td>
+                                <strong style="color:var(--ink);display:block;">@q.ClientName</strong>
+                                <small>@q.ClientEmail</small>
+                            </td>
+                            <td>@q.ProjectType</td>
+                            <td style="font-weight:500;color:var(--ink);">Rs. @q.Budget.ToString("N0")</td>
+                            <td><span class="badge badge-@(q.Status.ToLower())">@q.Status</span></td>
+                            <td>@q.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <div class="actions">
+                                    <a href="/Quote/Details/@q.Id" class="btn-sm btn-view">View</a>
+                                    <a href="/Quote/Edit/@q.Id" class="btn-sm btn-edit">Edit</a>
+                                    <form action="/Quote/Delete/@q.Id" method="post" onsubmit="return confirm('Delete this quote?');" style="margin:0">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-sm btn-delete">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

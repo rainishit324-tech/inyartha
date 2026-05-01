@@ -1,0 +1,71 @@
+﻿@model Quote
+@{
+    ViewData["Title"] = "Quote #" + Model.Id;
+}
+
+<div class="qpage">
+    <div class="qpage__left">
+        <div class="qpage__left-inner">
+            <a href="/Quote" class="qpage__back">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                Back to Dashboard
+            </a>
+            <div>
+                <div class="section__tag" style="margin-bottom:18px;">Quote Details</div>
+                <h1 class="qpage__title">Quote<br /><em>#@Model.Id</em></h1>
+                <p class="qpage__sub">Created on @Model.CreatedAt.ToString("dd MMM yyyy") by @Model.CreatedBy</p>
+            </div>
+            <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;">
+                <a href="/Quote/Edit/@Model.Id" class="btn btn--gold" style="justify-content:center;">Edit Quote</a>
+                <form action="/Quote/Delete/@Model.Id" method="post" onsubmit="return confirm('Permanently delete this quote?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn qbtn--danger" style="width:100%;justify-content:center;">Delete Quote</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="qpage__right">
+        <div class="qpage__form-wrap">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px;">
+                <div>
+                    <div class="section__tag" style="margin-bottom:8px;">@Model.ProjectType</div>
+                    <h2 style="font-family:var(--font-serif);font-size:1.8rem;">@Model.ClientName</h2>
+                </div>
+                <span class="badge badge-@(Model.Status.ToLower())" style="font-size:.88rem;padding:8px 20px;">@Model.Status</span>
+            </div>
+
+            <div class="detail-section">
+                <h4>Client Details</h4>
+                <div class="detail-grid">
+                    <dl class="detail-item"><dt>Full Name</dt><dd>@Model.ClientName</dd></dl>
+                    <dl class="detail-item"><dt>Phone</dt><dd>@(string.IsNullOrEmpty(Model.ClientPhone) ? "N/A" : Model.ClientPhone)</dd></dl>
+                    <dl class="detail-item detail-item--full"><dt>Email</dt><dd><a href="mailto:@Model.ClientEmail" style="color:var(--gold-deep)">@Model.ClientEmail</a></dd></dl>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4>Project Details</h4>
+                <div class="detail-grid">
+                    <dl class="detail-item"><dt>Project Type</dt><dd>@Model.ProjectType</dd></dl>
+                    <dl class="detail-item"><dt>Area</dt><dd>@(Model.AreaSqFt > 0 ? Model.AreaSqFt.ToString() + " sq ft" : "N/A")</dd></dl>
+                    <dl class="detail-item detail-item--full"><dt>Scope of Work</dt><dd style="line-height:1.7">@Model.Scope</dd></dl>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4>Financials &amp; Timeline</h4>
+                <div class="detail-grid">
+                    <dl class="detail-item"><dt>Estimated Budget</dt><dd style="font-size:1.2rem;font-family:var(--font-serif);color:var(--gold-deep);">Rs. @Model.Budget.ToString("N0")</dd></dl>
+                    <dl class="detail-item"><dt>Timeline</dt><dd>@(string.IsNullOrEmpty(Model.Timeline) ? "N/A" : Model.Timeline)</dd></dl>
+                    <dl class="detail-item detail-item--full"><dt>Notes</dt><dd style="line-height:1.7">@(string.IsNullOrEmpty(Model.Notes) ? "N/A" : Model.Notes)</dd></dl>
+                </div>
+            </div>
+
+            <div class="qactions">
+                <a href="/Quote/Edit/@Model.Id" class="btn btn--gold btn--lg">Edit Quote</a>
+                <a href="/Quote" class="btn qbtn--cancel">All Quotes</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,146 @@
+﻿@model Quote
+@{
+    ViewData["Title"] = "Edit Quote #" + Model.Id;
+}
+
+<div class="qpage">
+    <div class="qpage__left">
+        <div class="qpage__left-inner">
+            <a href="/Quote" class="qpage__back">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                Back to Dashboard
+            </a>
+            <div>
+                <div class="section__tag" style="margin-bottom:18px;">Edit Quote</div>
+                <h1 class="qpage__title">Editing<br /><em>#@Model.Id</em></h1>
+                <p class="qpage__sub">Update the client or project details below. Changes are saved on submit.</p>
+            </div>
+            <div class="qpage__steps">
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">1</div>
+                    <div><strong>Client Details</strong><small>Name, email, phone</small></div>
+                </div>
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">2</div>
+                    <div><strong>Project Details</strong><small>Type, area, scope</small></div>
+                </div>
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">3</div>
+                    <div><strong>Financials</strong><small>Budget &amp; timeline</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="qpage__right">
+        <div class="qpage__form-wrap">
+            <form method="post" asp-action="Edit">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="CreatedBy" />
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">01</span>
+                        <div><h3>Client Details</h3><p>Who is this quote for?</p></div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="ClientName">Client Name <span class="req">*</span></label>
+                            <input asp-for="ClientName" />
+                            <span asp-validation-for="ClientName" class="qerr"></span>
+                        </div>
+                        <div class="qfg">
+                            <label asp-for="ClientPhone">Phone Number</label>
+                            <input asp-for="ClientPhone" />
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--1">
+                        <div class="qfg">
+                            <label asp-for="ClientEmail">Email Address <span class="req">*</span></label>
+                            <input asp-for="ClientEmail" type="email" />
+                            <span asp-validation-for="ClientEmail" class="qerr"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qdivider"></div>
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">02</span>
+                        <div><h3>Project Details</h3><p>Tell us about the space</p></div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="ProjectType">Project Type <span class="req">*</span></label>
+                            <select asp-for="ProjectType">
+                                <option value="1BHK">1 BHK</option>
+                                <option value="2BHK">2 BHK</option>
+                                <option value="3BHK">3 BHK</option>
+                                <option value="4BHK+">4 BHK+</option>
+                                <option value="Villa">Villa</option>
+                                <option value="Office">Office / Commercial</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="qfg">
+                            <label asp-for="AreaSqFt">Estimated Area <span class="qunit">sq ft</span></label>
+                            <input asp-for="AreaSqFt" type="number" min="0" />
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--1">
+                        <div class="qfg">
+                            <label asp-for="Scope">Scope of Work <span class="req">*</span></label>
+                            <textarea asp-for="Scope" rows="4"></textarea>
+                            <span asp-validation-for="Scope" class="qerr"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qdivider"></div>
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">03</span>
+                        <div><h3>Financials &amp; Timeline</h3><p>Budget and delivery expectations</p></div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="Budget">Estimated Budget <span class="qunit">Rs.</span> <span class="req">*</span></label>
+                            <input asp-for="Budget" type="number" step="1000" min="0" />
+                            <span asp-validation-for="Budget" class="qerr"></span>
+                        </div>
+                        <div class="qfg">
+                            <label asp-for="Timeline">Expected Timeline</label>
+                            <input asp-for="Timeline" />
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="Status">Quote Status</label>
+                            <select asp-for="Status">
+                                <option value="Draft">Draft</option>
+                                <option value="Sent">Sent</option>
+                                <option value="Accepted">Accepted</option>
+                                <option value="Declined">Declined</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--1">
+                        <div class="qfg">
+                            <label asp-for="Notes">Special Notes / Requirements</label>
+                            <textarea asp-for="Notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qactions">
+                    <button type="submit" class="btn btn--gold btn--lg">Update Quote</button>
+                    <a href="/Quote/Details/@Model.Id" class="btn qbtn--cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

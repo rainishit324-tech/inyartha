@@ -1,0 +1,51 @@
+﻿@model LoginViewModel
+@{ ViewData["Title"] = "Admin Login"; }
+
+@section Styles {
+<style>
+.auth-wrap { min-height:calc(100vh - 110px); display:grid; place-items:center; padding:40px 16px; }
+.auth-card { width:min(460px,100%); padding:48px 44px; border-radius:24px; background:var(--glass-bg-strong); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid var(--glass-border); box-shadow:var(--glass-shadow); }
+.auth-card__logo { text-align:center; margin-bottom:32px; }
+.auth-card__logo img { height:52px; object-fit:contain; }
+.mark-lg { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold-deep)); color:#fff; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:1.6rem; display:grid; place-items:center; margin:0 auto 12px; }
+.auth-card h2 { font-size:2rem; text-align:center; margin-bottom:8px; }
+.auth-card .sub { text-align:center; color:var(--ink-soft); font-size:.9rem; margin-bottom:32px; }
+.form-group { margin-bottom:20px; }
+.form-group label { display:block; font-size:.83rem; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px; }
+.form-group input { width:100%; padding:14px 18px; border-radius:12px; border:1px solid var(--line); background:rgba(255,252,245,.7); font-family:'DM Sans',sans-serif; font-size:.95rem; color:var(--ink); outline:none; transition:border-color .25s,box-shadow .25s; }
+.form-group input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,153,104,.18); }
+.btn-submit { width:100%; padding:16px; border:none; border-radius:999px; font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:500; color:#fff; background:linear-gradient(135deg,var(--gold),var(--gold-deep)); cursor:pointer; box-shadow:0 6px 20px rgba(138,109,63,.3); transition:transform .25s,box-shadow .25s; margin-top:8px; }
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(138,109,63,.38); }
+.validation-summary-errors { background:rgba(220,53,69,.08); border:1px solid rgba(220,53,69,.25); border-radius:12px; padding:14px 18px; margin-bottom:20px; font-size:.88rem; color:#c0392b; }
+.field-validation-error { font-size:.82rem; color:#c0392b; margin-top:6px; display:block; }
+</style>
+}
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-card__logo">
+            <img src="~/images/logo.png" alt="Inyartha"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='grid';" />
+            <div class="mark-lg" style="display:none">I</div>
+        </div>
+        <h2>Admin Login</h2>
+        <p class="sub">Sign in to manage client quotes</p>
+        <form asp-action="Login" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+            <div asp-validation-summary="All" class="validation-summary-errors"
+                 style="display:@(ViewData.ModelState.IsValid ? "none" : "block")"></div>
+            <div class="form-group">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" placeholder="Enter username" autocomplete="username" />
+                <span asp-validation-for="Username" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" placeholder="Enter password" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-validation-error"></span>
+            </div>
+            <button type="submit" class="btn-submit">Sign In →</button>
+        </form>
+    </div>
+</div>
