@@ -33,7 +33,15 @@ public class QuoteController : Controller
         model.Id = Guid.NewGuid().ToString("N")[..8].ToUpper();
         model.CreatedAt = DateTime.Now;
         model.CreatedBy = User.Identity?.Name ?? "admin";
-        await _qs.SaveAsync(model);
+        try
+        {
+            await _qs.SaveAsync(model);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Failed to save: {ex.Message}");
+            return View(model);
+        }
         TempData["Success"] = $"Quote #{model.Id} created successfully.";
         return RedirectToAction(nameof(Index));
     }
@@ -53,7 +61,15 @@ public class QuoteController : Controller
         ModelState.Remove(nameof(model.Timeline));
         ModelState.Remove(nameof(model.Notes));
         if (!ModelState.IsValid) return View(model);
-        await _qs.SaveAsync(model);
+        try
+        {
+            await _qs.SaveAsync(model);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Failed to save: {ex.Message}");
+            return View(model);
+        }
         TempData["Success"] = $"Quote #{model.Id} updated.";
         return RedirectToAction(nameof(Index));
     }

@@ -47,7 +47,7 @@
                     <div class="qgrid qgrid--2">
                         <div class="qfg">
                             <label asp-for="ClientName">Client Name <span class="req">*</span></label>
-                            <input asp-for="ClientName" placeholder="e.g. Rajesh Kumar" autocomplete="off" />
+                            <input asp-for="ClientName" placeholder="e.g. Rajesh Kumar" autocomplete="off" required />
                             <span asp-validation-for="ClientName" class="qerr"></span>
                         </div>
                         <div class="qfg">
@@ -58,7 +58,7 @@
                     <div class="qgrid qgrid--1">
                         <div class="qfg">
                             <label asp-for="ClientEmail">Email Address <span class="req">*</span></label>
-                            <input asp-for="ClientEmail" type="email" placeholder="client@example.com" />
+                            <input asp-for="ClientEmail" type="email" placeholder="client@example.com" required />
                             <span asp-validation-for="ClientEmail" class="qerr"></span>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                     <div class="qgrid qgrid--2">
                         <div class="qfg">
                             <label asp-for="ProjectType">Project Type <span class="req">*</span></label>
-                            <select asp-for="ProjectType">
+                            <select asp-for="ProjectType" required>
                                 <option value="">Select type</option>
                                 <option value="1BHK">1 BHK</option>
                                 <option value="2BHK">2 BHK</option>
@@ -95,7 +95,7 @@
                     <div class="qgrid qgrid--1">
                         <div class="qfg">
                             <label asp-for="Scope">Description <span class="req">*</span></label>
-                            <textarea asp-for="Scope" rows="4" placeholder="e.g. Modular kitchen, 3 bedrooms with wardrobes, false ceiling..."></textarea>
+                            <textarea asp-for="Scope" rows="4" placeholder="e.g. Modular kitchen, 3 bedrooms with wardrobes, false ceiling..." required></textarea>
                             <span asp-validation-for="Scope" class="qerr"></span>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                     <button type="button" id="add-line-item" class="btn btn--outline" style="margin-top:4px;">+ Add Item</button>
                 </div>
 
-                <div asp-validation-summary="All" class="validation-summary-errors" style="display:none;margin-bottom:16px;"></div>
+                <div asp-validation-summary="All" class="validation-summary-errors text-danger" style="margin-bottom:16px;"></div>
 
                 <div class="qactions">
                     <button type="button" id="save-btn" class="btn btn--gold btn--lg">Save Quote</button>
