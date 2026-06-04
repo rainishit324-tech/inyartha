@@ -1,0 +1,465 @@
+﻿@model Quote
+@{
+    ViewData["Title"] = "Edit Quote #" + Model.Id;
+}
+
+<div class="qpage">
+    <div class="qpage__left">
+        <div class="qpage__left-inner">
+            <a href="/Quote" class="qpage__back">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                Back to Dashboard
+            </a>
+            <div>
+                <div class="section__tag" style="margin-bottom:18px;">Edit Quote</div>
+                <h1 class="qpage__title">Editing<br /><em>@Model.ClientName</em></h1>
+                <p class="qpage__sub">Update the client or project details below. Changes are saved on submit.</p>
+            </div>
+            <div class="qpage__steps">
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">1</div>
+                    <div><strong>Client Details</strong><small>Name, email, phone</small></div>
+                </div>
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">2</div>
+                    <div><strong>Project Details</strong><small>Type, area, scope</small></div>
+                </div>
+                <div class="qstep qstep--active">
+                    <div class="qstep__num">3</div>
+                    <div><strong>Line Items</strong><small>Items &amp; pricing</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="qpage__right">
+        <div class="qpage__form-wrap">
+            <form id="quote-form" method="post" asp-action="Edit">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="CreatedBy" />
+                <input type="hidden" asp-for="Budget" value="0" />
+                <input type="hidden" asp-for="Timeline" value="" />
+                <input type="hidden" asp-for="Notes" value="" />
+                <script id="existing-items-data" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LineItems))</script>
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">01</span>
+                        <div><h3>Client Details</h3><p>Who is this quote for?</p></div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="ClientName">Client Name <span class="req">*</span></label>
+                            <input asp-for="ClientName" />
+                            <span asp-validation-for="ClientName" class="qerr"></span>
+                        </div>
+                        <div class="qfg">
+                            <label asp-for="ClientPhone">Phone Number</label>
+                            <input asp-for="ClientPhone" />
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--1">
+                        <div class="qfg">
+                            <label asp-for="ClientEmail">Email Address <span class="req">*</span></label>
+                            <input asp-for="ClientEmail" type="email" />
+                            <span asp-validation-for="ClientEmail" class="qerr"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qdivider"></div>
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">02</span>
+                        <div><h3>Project Details</h3><p>Tell us about the space</p></div>
+                    </div>
+                    <div class="qgrid qgrid--2">
+                        <div class="qfg">
+                            <label asp-for="ProjectType">Project Type <span class="req">*</span></label>
+                            <select asp-for="ProjectType">
+                                <option value="1BHK">1 BHK</option>
+                                <option value="2BHK">2 BHK</option>
+                                <option value="3BHK">3 BHK</option>
+                                <option value="4BHK+">4 BHK+</option>
+                                <option value="Villa">Villa</option>
+                                <option value="Office">Office / Commercial</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="qfg">
+                            <label asp-for="AreaSqFt">Estimated Area <span class="qunit">sq ft</span></label>
+                            <input asp-for="AreaSqFt" type="number" min="0" />
+                        </div>
+                    </div>
+                    <div class="qgrid qgrid--1">
+                        <div class="qfg">
+                            <label asp-for="Scope">Description <span class="req">*</span></label>
+                            <textarea asp-for="Scope" rows="4"></textarea>
+                            <span asp-validation-for="Scope" class="qerr"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qsection">
+                    <div class="qsection__header">
+                        <span class="qsection__num">03</span>
+                        <div><h3>Line Items</h3><p>Items with area/qty, unit price and auto-calculated total</p></div>
+                    </div>
+                    <div id="line-items-container">
+                        <div class="qgrid qgrid--1" id="line-items-list"></div>
+                    </div>
+                    <button type="button" id="add-line-item" class="btn btn--outline" style="margin-top:4px;">+ Add Item</button>
+                </div>
+
+                <div asp-validation-summary="All" class="validation-summary-errors" style="display:none;margin-bottom:16px;"></div>
+
+                <div class="qactions">
+                    <button type="button" id="save-btn" class="btn btn--gold btn--lg">Save</button>
+                    <a href="/Quote" class="btn qbtn--cancel">Cancel</a>
+                </div>
+            </form>
+
+            <!-- Quote Preview Modal (OUTSIDE form — confirm uses JS form.submit) -->
+            <div id="quote-preview-modal" class="modal-overlay" style="display:none;">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h2>Quote Preview — <small id="modal-quote-id">@Model.ClientName</small></h2>
+                        <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body" style="overflow-y:auto;padding:24px 28px;">
+                        <div id="quote-preview-content"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn--outline" id="modal-download-btn">Print</button>
+                        <button type="button" class="btn btn--gold" id="modal-confirm-btn">Confirm &amp; Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            /* ── Items loaded dynamically from items.xlsx via ItemsService ── */
+            var ITEMS = [];
+            fetch('/Items/GetAll').then(function(r){return r.json();}).then(function(d){ITEMS=d;}).catch(function(e){console.warn('Items fetch failed',e);});
+
+            var quoteId = '@Model.Id';
+            var previewData = null;
+
+            function fillRow(row, itemData) {
+                var desc = row.querySelector('.li-description');
+                var mat = row.querySelector('.li-material');
+                var rate = row.querySelector('.li-rate');
+                if (desc) desc.value = itemData.description || '';
+
+                var variants = ITEMS.filter(function(i) { return i.name === itemData.name; });
+                var uniqueMaterials = [];
+                var seen = {};
+                variants.forEach(function(v) {
+                    var mVal = v.material || '';
+                    if (!seen[mVal]) {
+                        seen[mVal] = true;
+                        uniqueMaterials.push(v);
+                    }
+                });
+
+                if (uniqueMaterials.length === 1) {
+                    if (mat) mat.value = uniqueMaterials[0].material || '';
+                    if (rate) rate.value = uniqueMaterials[0].rate || 0;
+                } else {
+                    if (mat) mat.value = '';
+                    if (rate) rate.value = '';
+                }
+                recalcRow(row);
+            }
+
+            function rowHTML(index, data) {
+                data = data || {};
+                var html = '<div class="li-row" data-idx="'+index+'" style="background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;">';
+                html += '<div class="qgrid qgrid--1"><div class="qfg"><label>Item Name <span class="req">*</span></label><div class="combobox"><input class="li-name" name="LineItems['+index+'].ItemName" value="'+esc(data.ItemName||'')+'" placeholder="Search or type item name..." autocomplete="off" /><div class="combobox-dropdown"></div></div></div></div>';
+                html += '<div class="qgrid qgrid--2" style="margin-top:12px;">';
+                html += '<div class="qfg"><label>Description</label><input class="li-description" name="LineItems['+index+'].Description" value="'+esc(data.Description||'')+'" placeholder="e.g. Tinted Glass Door, Gyproc Panel..." /></div>';
+                html += '<div class="qfg"><label>Material</label><div class="combobox"><input class="li-material" name="LineItems['+index+'].Material" value="'+esc(data.Material||'')+'" placeholder="Search or type material..." autocomplete="off" /><div class="combobox-dropdown"></div></div></div>';
+                html += '</div>';
+                html += '<div class="qgrid" style="grid-template-columns:1fr 1fr auto;align-items:end;margin-top:12px;">';
+                html += '<div class="qfg"><label>Area <span class="qunit">sq ft</span></label><input class="li-area" name="LineItems['+index+'].Area" type="number" step="0.01" min="0" value="'+(data.Area||'')+'" placeholder="0.00" /></div>';
+                html += '<div class="qfg"><label>Rate <span class="qunit">Rs.</span></label><input class="li-rate" name="LineItems['+index+'].UnitPrice" type="number" step="0.01" min="0" value="'+(data.UnitPrice||'')+'" placeholder="0.00" /></div>';
+                html += '<div style="display:flex;align-items:center;gap:12px;padding-bottom:4px;"><span style="font-size:.85rem;color:var(--ink-soft);white-space:nowrap;">Total:</span><span class="li-total" style="font-family:var(--font-serif);font-size:1.15rem;font-weight:600;color:var(--gold-deep);white-space:nowrap;">Rs. 0.00</span><button type="button" class="li-remove btn" style="background:rgba(220,53,69,.08);color:#c0392b;padding:8px 14px;font-size:.78rem;border:none;cursor:pointer;border-radius:999px;">✕ Remove</button></div></div></div>';
+                return html;
+            }
+
+            function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+            function recalcRow(row) {
+                var a = parseFloat(row.querySelector('.li-area').value) || 0;
+                var r = parseFloat(row.querySelector('.li-rate').value) || 0;
+                row.querySelector('.li-total').textContent = 'Rs. ' + (a*r).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+            }
+
+            function setupMaterialCombobox(row) {
+                var input = row.querySelector('.li-material');
+                if (!input) return;
+                var dropdown = input.parentNode.querySelector('.combobox-dropdown');
+                if (!dropdown) return;
+                var itemName = row.querySelector('.li-name').value.trim();
+
+                function filterMaterials() {
+                    var val = input.value.toLowerCase().trim();
+                    var all = itemName ? ITEMS.filter(function(i) { return i.name === itemName && i.material; }) : [];
+                    var matches = val ? all.filter(function(i) { return i.material.toLowerCase().indexOf(val) !== -1; }) : all;
+                    var seen = {};
+                    matches = matches.filter(function(i) { if (seen[i.material]) return false; seen[i.material] = true; return true; });
+                    dropdown.innerHTML = '';
+                    if (matches.length === 0) { dropdown.classList.remove('is-open'); return; }
+                    matches.forEach(function(item) {
+                        var div = document.createElement('div');
+                        div.className = 'combobox-item';
+                        var idx2 = val ? item.material.toLowerCase().indexOf(val) : -1;
+                        if (val && idx2 !== -1) {
+                            div.innerHTML = esc(item.material.slice(0, idx2)) + '<strong>' + esc(item.material.slice(idx2, idx2 + val.length)) + '</strong>' + esc(item.material.slice(idx2 + val.length));
+                        } else {
+                            div.textContent = item.material;
+                        }
+                        div.addEventListener('click', function(e) {
+                            input.value = item.material;
+                            dropdown.classList.remove('is-open');
+                            var rateField = row.querySelector('.li-rate');
+                            if (rateField) rateField.value = item.rate || 0;
+                            recalcRow(row);
+                            input.focus();
+                        });
+                        dropdown.appendChild(div);
+                    });
+                    dropdown.classList.add('is-open');
+                }
+
+                input.addEventListener('input', filterMaterials);
+                input.addEventListener('focus', function() { filterMaterials(); });
+                input.addEventListener('blur', function() { setTimeout(function() { dropdown.classList.remove('is-open'); }, 200); });
+            }
+
+            function reindex() {
+                var rows = document.querySelectorAll('.li-row');
+                rows.forEach(function(r,i) {
+                    r.setAttribute('data-idx',i);
+                    r.querySelector('.li-name').name = 'LineItems['+i+'].ItemName';
+                    var d = r.querySelector('.li-description');
+                    if (d) d.name = 'LineItems['+i+'].Description';
+                    var m = r.querySelector('.li-material');
+                    if (m) m.name = 'LineItems['+i+'].Material';
+                    r.querySelector('.li-area').name = 'LineItems['+i+'].Area';
+                    r.querySelector('.li-rate').name = 'LineItems['+i+'].UnitPrice';
+                });
+            }
+
+            function setupCombobox(input) {
+                var dropdown = input.parentNode.querySelector('.combobox-dropdown');
+                if (!dropdown) return;
+
+                function filterItems() {
+                    var val = input.value.toLowerCase().trim();
+                    var all = val ? ITEMS.filter(function(i) { return i.name.toLowerCase().indexOf(val) !== -1; }) : ITEMS;
+                    var seen = {};
+                    var matches = all.filter(function(i) { if (seen[i.name]) return false; seen[i.name] = true; return true; });
+                    dropdown.innerHTML = '';
+                    if (matches.length === 0) {
+                        dropdown.innerHTML = '<div class="combobox-empty">No items match</div>';
+                    } else {
+                        matches.forEach(function(item) {
+                            var div = document.createElement('div');
+                            div.className = 'combobox-item';
+                            var boldStart = item.name.toLowerCase().indexOf(val);
+                            if (val && boldStart !== -1) {
+                                var before = esc(item.name.slice(0, boldStart));
+                                var match = esc(item.name.slice(boldStart, boldStart + val.length));
+                                var after = esc(item.name.slice(boldStart + val.length));
+                                div.innerHTML = before + '<strong>' + match + '</strong>' + after;
+                            } else {
+                                div.textContent = item.name;
+                            }
+                            div.addEventListener('click', function(e) {
+                                input.value = item.name;
+                                dropdown.classList.remove('is-open');
+                                var row = input.closest('.li-row');
+                                if (row) fillRow(row, item);
+                                if (row) setupMaterialCombobox(row);
+                                input.focus();
+                            });
+                            dropdown.appendChild(div);
+                        });
+                    }
+                    dropdown.classList.add('is-open');
+                }
+
+                input.addEventListener('input', filterItems);
+                input.addEventListener('focus', function() {
+                    if (!this.value) filterItems();
+                    else filterItems();
+                });
+                input.addEventListener('blur', function() {
+                    setTimeout(function() { dropdown.classList.remove('is-open'); }, 200);
+                });
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('is-open');
+                    }
+                });
+            }
+
+            function addRow(data) {
+                var c = document.getElementById('line-items-list');
+                c.insertAdjacentHTML('beforeend', rowHTML(idx, data));
+                var row = c.querySelector('.li-row:last-child');
+                row.querySelector('.li-area').addEventListener('input', function(){ recalcRow(row); });
+                row.querySelector('.li-rate').addEventListener('input', function(){ recalcRow(row); });
+                row.querySelector('.li-remove').addEventListener('click', function(){ row.remove(); reindex(); });
+                setupCombobox(row.querySelector('.li-name'));
+                if (data && data.ItemName) {
+                    row.querySelector('.li-name').value = data.ItemName;
+                    if (!data.Material) {
+                        var match = ITEMS.find(function(item) { return item.name === data.ItemName; });
+                        if (match) fillRow(row, match);
+                    }
+                    setTimeout(function() { setupMaterialCombobox(row); }, 0);
+                }
+                if (data && (data.Area || data.UnitPrice)) recalcRow(row);
+                idx++;
+            }
+
+            var idx = 0;
+            var existingEl = document.getElementById('existing-items-data');
+            if (existingEl) {
+                try {
+                    var existing = JSON.parse(existingEl.textContent);
+                    if (existing && existing.length) existing.forEach(function(item){ addRow(item); });
+                } catch(e) {}
+            }
+
+            function collectFormData() {
+                function v(n) { return (document.getElementById('quote-form').elements[n] && document.getElementById('quote-form').elements[n].value) || ''; }
+                var d = {
+                    ClientName: v('ClientName'),
+                    ClientEmail: v('ClientEmail'),
+                    ClientPhone: v('ClientPhone'),
+                    ProjectType: v('ProjectType'),
+                    AreaSqFt: v('AreaSqFt'),
+                    Scope: v('Scope'),
+                    LineItems: []
+                };
+                document.querySelectorAll('.li-row').forEach(function(r) {
+                    var item = {
+                        ItemName: r.querySelector('.li-name').value,
+                        Description: r.querySelector('.li-description') ? r.querySelector('.li-description').value : '',
+                        Material: r.querySelector('.li-material') ? r.querySelector('.li-material').value : '',
+                        Area: parseFloat(r.querySelector('.li-area').value) || 0,
+                        UnitPrice: parseFloat(r.querySelector('.li-rate').value) || 0
+                    };
+                    if (item.ItemName) d.LineItems.push(item);
+                });
+                return d;
+            }
+
+            function formatDate() {
+                var d = new Date();
+                return d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getFullYear();
+            }
+
+            function g(val) {
+                var n = parseFloat(val) || 0;
+                return 'Rs. ' + n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+            }
+
+            function buildPreviewHTML(data, isPrint) {
+                var gold = '#b89968', goldDeep = '#8a6d3f', ink = '#1a1410', inkSoft = '#5c4f43';
+                var style = isPrint ? '' : ' style="font-family:system-ui,sans-serif;color:'+ink+';max-width:760px;margin:0 auto;"';
+                var imgPath = (isPrint ? window.location.origin : '') + '/images/';
+                var cb = '?v=' + Date.now();
+                var grandTotal = 0;
+                var liRows = '';
+                if (data.LineItems && data.LineItems.length) {
+                    data.LineItems.forEach(function(item) {
+                        var total = item.Area * item.UnitPrice;
+                        grandTotal += total;
+                        var matOrDesc = item.Material || item.Description || '\u2014';
+                        liRows += '<tr><td style="padding:8px 10px;border-bottom:1px solid '+gold+'55;font-size:13px;">'+esc(item.ItemName)+'</td><td style="padding:8px 10px;border-bottom:1px solid '+gold+'55;font-size:13px;color:'+inkSoft+'">'+esc(matOrDesc)+'</td><td style="padding:8px 10px;border-bottom:1px solid '+gold+'55;font-size:13px;text-align:right;">'+(item.Area||0).toFixed(2)+'</td><td style="padding:8px 10px;border-bottom:1px solid '+gold+'55;font-size:13px;text-align:right;">'+g(item.UnitPrice)+'</td><td style="padding:8px 10px;border-bottom:1px solid '+gold+'55;font-size:13px;text-align:right;font-weight:600;color:'+goldDeep+'">'+g(total)+'</td></tr>';
+                    });
+                }
+                var scopeHtml = esc(data.Scope||'—');
+                return '<div'+style+'>' +
+                    '<div style="display:flex;justify-content:center;padding-bottom:12px;border-bottom:2px solid '+goldDeep+';">' +
+                        '<img src="'+imgPath+'logo.png'+cb+'" alt="Inyartha" style="height:55px;width:auto;" />' +
+                    '</div>' +
+                    '<div style="text-align:center;font-size:11px;color:'+inkSoft+';padding-top:6px;">Design Studio</div>' +
+                    '<div style="display:flex;justify-content:space-between;margin:16px 0 12px;font-size:13px;">' +
+                        '<div><strong>Quote #:</strong> '+esc(data.QuoteId)+'</div>' +
+                        '<div><strong>Date:</strong> '+esc(data.Date)+'</div>' +
+                    '</div>' +
+                    '<div style="margin:16px 0 8px;"><div style="font-size:14px;font-weight:700;color:'+goldDeep+';">CLIENT DETAILS</div><div style="height:1px;background:'+gold+';width:100%;margin:4px 0 10px;"></div></div>' +
+                    '<div style="font-size:13px;line-height:1.7;">Name: '+esc(data.ClientName||'—')+'<br>Email: '+esc(data.ClientEmail||'—')+'<br>Phone: '+esc(data.ClientPhone||'—')+'</div>' +
+                    '<div style="margin:18px 0 8px;"><div style="font-size:14px;font-weight:700;color:'+goldDeep+';">PROJECT DETAILS</div><div style="height:1px;background:'+gold+';width:100%;margin:4px 0 10px;"></div></div>' +
+                    '<div style="font-size:13px;line-height:1.7;">Type: '+esc(data.ProjectType||'—')+'<br>Area: '+esc(data.AreaSqFt||'—')+' sq ft<br>Scope: '+scopeHtml+'</div>' +
+                    (data.LineItems && data.LineItems.length ? (
+                        '<div style="margin:18px 0 8px;"><div style="font-size:14px;font-weight:700;color:'+goldDeep+';">LINE ITEMS</div><div style="height:1px;background:'+gold+';width:100%;margin:4px 0 10px;"></div></div>' +
+                        '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                            '<thead><tr style="background:'+goldDeep+';color:#fff;">' +
+                                '<th style="padding:10px;text-align:left;">Item</th><th style="padding:10px;text-align:left;">Material / Description</th><th style="padding:10px;text-align:right;">Area</th><th style="padding:10px;text-align:right;">Rate</th><th style="padding:10px;text-align:right;">Total</th>' +
+                            '</tr></thead>' +
+                            '<tbody>'+liRows+'</tbody>' +
+                            '<tfoot><tr style="background:#faf7f2;">' +
+                                '<td colspan="3" style="padding:10px;"></td>' +
+                                '<td style="padding:10px;text-align:right;font-weight:700;font-size:14px;">Grand Total</td>' +
+                                '<td style="padding:10px;text-align:right;font-weight:700;font-size:14px;color:'+goldDeep+';">'+g(grandTotal)+'</td>' +
+                            '</tr></tfoot>' +
+                        '</table>'
+                    ) : '<div style="font-size:13px;color:'+inkSoft+';margin:8px 0;">No line items added.</div>') +
+                    '<div style="margin-top:20px;text-align:right;">' +
+                        '<div style="display:inline-block;text-align:center;"><img src="'+imgPath+'signature.png'+cb+'" alt="Signature" style="height:55px;width:auto;" /><div style="font-size:9px;color:'+inkSoft+';">(Authorised Signatory)</div></div>' +
+                    '</div>' +
+                    '<div style="margin-top:10px;padding-top:8px;border-top:1px solid '+gold+';font-size:10px;color:'+inkSoft+';text-align:center;">Inyartha Design Studio | Budigere Cross, Bengaluru 560049<br>+91 81232 97276 | hello@inyartha.com</div>' +
+                '</div>';
+            }
+
+            function showPreview() {
+                var form = document.getElementById('quote-form');
+                if (!form) return;
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+                previewData = collectFormData();
+                previewData.QuoteId = quoteId;
+                previewData.Date = formatDate();
+                document.getElementById('modal-quote-id').textContent = previewData.ClientName;
+                document.getElementById('quote-preview-content').innerHTML = buildPreviewHTML(previewData, false);
+                document.getElementById('quote-preview-modal').style.display = 'flex';
+            }
+
+            function hideModal() {
+                document.getElementById('quote-preview-modal').style.display = 'none';
+            }
+
+            function printPDF() {
+                if (!previewData) return;
+                var origin = window.location.origin;
+                var w = window.open('', '_blank');
+                w.document.write('<!DOCTYPE html><html><head><title>Inyartha Quote '+quoteId+'</title><style>@@page{size:A4;margin:15mm;}body{font-family:system-ui,sans-serif;color:#1a1410;padding:0;margin:0;}@@media print{body{width:100%;}img{max-width:100%;}}</style></head><body>');
+                w.document.write(buildPreviewHTML(previewData, true));
+                w.document.write('</body></html>');
+                w.document.close();
+                w.focus();
+                setTimeout(function(){ w.print(); }, 500);
+            }
+
+            document.getElementById('add-line-item').addEventListener('click', function(){ addRow(); });
+            document.getElementById('save-btn').addEventListener('click', showPreview);
+            document.getElementById('modal-close-btn').addEventListener('click', hideModal);
+            document.getElementById('modal-download-btn').addEventListener('click', printPDF);
+            document.getElementById('modal-confirm-btn').addEventListener('click', function() {
+                document.getElementById('quote-form').submit();
+            });
+        })();
+    </script>
+}

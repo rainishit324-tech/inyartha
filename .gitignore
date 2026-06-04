@@ -1,0 +1,9 @@
+# Ignores for Hugging Face (no binary files)
+*.jpg
+*.png
+*.ico
+*.xlsx
+.csproj.user
+.DS_Store
+bin/
+obj/
