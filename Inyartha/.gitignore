@@ -1,0 +1,21 @@
+# Node
+node_modules/
+
+# Build
+bin/
+obj/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.csproj.user
+.vs/
+.vscode/
+
+# Hugging Face - no binary files in git
+*.jpg
+*.png
+*.ico
+*.xlsx

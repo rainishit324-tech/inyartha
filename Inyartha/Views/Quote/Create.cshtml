@@ -38,6 +38,7 @@
                 <input type="hidden" asp-for="Budget" value="0" />
                 <input type="hidden" asp-for="Timeline" value="" />
                 <input type="hidden" asp-for="Notes" value="" />
+                <script id="existing-items-data" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LineItems))</script>
 
                 <div class="qsection">
                     <div class="qsection__header">
@@ -331,6 +332,13 @@
             }
 
             var idx = 0;
+            var existingEl = document.getElementById('existing-items-data');
+            if (existingEl) {
+                try {
+                    var existing = JSON.parse(existingEl.textContent);
+                    if (existing && existing.length) existing.forEach(function(item){ addRow(item); });
+                } catch(e) {}
+            }
 
             function collectFormData() {
                 var fd = new FormData(document.getElementById('quote-form'));
