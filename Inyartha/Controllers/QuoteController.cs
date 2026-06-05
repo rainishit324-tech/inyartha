@@ -26,13 +26,12 @@ public class QuoteController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Quote model)
     {
-        ModelState.Remove(nameof(model.Budget));
-        ModelState.Remove(nameof(model.Timeline));
-        ModelState.Remove(nameof(model.Notes));
+        PrepareModelForSave(model);
         if (!ModelState.IsValid) return View(model);
         model.Id = Guid.NewGuid().ToString("N")[..8].ToUpper();
         model.CreatedAt = DateTime.Now;
         model.CreatedBy = User.Identity?.Name ?? "admin";
+        model.Status = "Draft";
         try
         {
             await _qs.SaveAsync(model);
@@ -57,9 +56,14 @@ public class QuoteController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Quote model)
     {
-        ModelState.Remove(nameof(model.Budget));
-        ModelState.Remove(nameof(model.Timeline));
-        ModelState.Remove(nameof(model.Notes));
+        PrepareModelForSave(model);
+        var existing = await _qs.GetByIdAsync(model.Id);
+        if (existing != null)
+        {
+            model.CreatedAt = existing.CreatedAt;
+            model.CreatedBy = existing.CreatedBy;
+            model.Status = existing.Status;
+        }
         if (!ModelState.IsValid) return View(model);
         try
         {
@@ -114,5 +118,33 @@ public class QuoteController : Controller
         await _qs.DeleteAsync(id);
         TempData["Success"] = "Quote deleted.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private void PrepareModelForSave(Quote model)
+    {
+        ModelState.Remove(nameof(model.Budget));
+        ModelState.Remove(nameof(model.Timeline));
+        ModelState.Remove(nameof(model.Notes));
+        ModelState.Remove(nameof(model.CreatedAt));
+        ModelState.Remove(nameof(model.CreatedBy));
+        ModelState.Remove(nameof(model.Status));
+
+        var cleaned = new List<QuoteLineItem>();
+        if (model.LineItems != null)
+        {
+            for (int i = 0; i < model.LineItems.Count; i++)
+            {
+                var key = $"LineItems[{i}]";
+                ModelState.Remove($"{key}.ItemName");
+                ModelState.Remove($"{key}.Description");
+                ModelState.Remove($"{key}.Material");
+                ModelState.Remove($"{key}.Area");
+                ModelState.Remove($"{key}.UnitPrice");
+
+                if (!string.IsNullOrWhiteSpace(model.LineItems[i].ItemName))
+                    cleaned.Add(model.LineItems[i]);
+            }
+        }
+        model.LineItems = cleaned;
     }
 }

@@ -17,14 +17,8 @@
             <img src="~/images/logo.png" alt="Inyartha Logo" class="nav__logo" />
         </a>
         <div class="nav__links">
-            <a href="/#about">About</a>
-            <a href="/#services">Services</a>
-            <a href="/#projects">Projects</a>
-            <a href="/#testimonials">Testimonials</a>
-            <a href="/#contact">Contact</a>
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a href="/Quote" class="btn btn--gold">Quotes Dashboard</a>
                 <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn" style="cursor:pointer;border:none;">Logout</button>
@@ -32,6 +26,11 @@
             }
             else
             {
+                <a href="/#about">About</a>
+                <a href="/#services">Services</a>
+                <a href="/#projects">Projects</a>
+                <a href="/#testimonials">Testimonials</a>
+                <a href="/#contact">Contact</a>
                 <a href="/#contact" class="btn btn--gold">Get Free Quote</a>
                 <a href="/Account/Login" class="btn">Admin</a>
             }
@@ -42,17 +41,16 @@
     </nav>
 
     <aside class="mobile-menu" id="mobileMenu">
-        <a href="/#about">About</a>
-        <a href="/#services">Services</a>
-        <a href="/#projects">Projects</a>
-        <a href="/#testimonials">Testimonials</a>
-        <a href="/#contact">Contact</a>
         @if (User.Identity?.IsAuthenticated == true)
         {
-            <a href="/Quote" class="btn btn--gold">Quotes</a>
         }
         else
         {
+            <a href="/#about">About</a>
+            <a href="/#services">Services</a>
+            <a href="/#projects">Projects</a>
+            <a href="/#testimonials">Testimonials</a>
+            <a href="/#contact">Contact</a>
             <a href="/#contact" class="btn btn--gold">Get Free Quote</a>
             <a href="/Account/Login" class="btn">Admin</a>
         }

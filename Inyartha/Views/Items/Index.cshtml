@@ -1,19 +1,19 @@
-﻿@model List<Quote>
+@model List<ItemTemplate>
 @{
-    ViewData["Title"] = "Quotes Dashboard";
+    ViewData["Title"] = "Manage Items";
 }
 
 <div class="dashboard">
     <div style="display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:28px;">
-        <a href="/Quote" style="padding:12px 28px;font-size:0.9rem;font-weight:600;color:var(--gold-deep);border-bottom:2px solid var(--gold-deep);margin-bottom:-2px;transition:color .2s;">Quotes Dashboard</a>
-        <a href="/Items" style="padding:12px 28px;font-size:0.9rem;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s;text-decoration:none;">Manage Items</a>
+        <a href="/Quote" style="padding:12px 28px;font-size:0.9rem;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s;text-decoration:none;">Quotes Dashboard</a>
+        <a href="/Items" style="padding:12px 28px;font-size:0.9rem;font-weight:600;color:var(--gold-deep);border-bottom:2px solid var(--gold-deep);margin-bottom:-2px;transition:color .2s;">Manage Items</a>
     </div>
     <div class="dashboard__header">
         <div>
             <div class="section__tag" style="margin-bottom:12px;">Admin Panel</div>
-            <h1>Quotes Dashboard</h1>
+            <h1>Manage Items</h1>
         </div>
-        <a href="/Quote/Create" class="btn btn--gold btn--lg">+ New Quote</a>
+        <a href="/Items/Create" class="btn btn--gold btn--lg">+ New Item</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -28,9 +28,9 @@
     {
         <div class="quotes-table-wrap">
             <div class="empty-state">
-                <h3>No quotes yet</h3>
-                <p>Create your first client quote to get started.</p>
-                <a href="/Quote/Create" class="btn btn--gold">Create First Quote</a>
+                <h3>No items yet</h3>
+                <p>Add your first line item to get started.</p>
+                <a href="/Items/Create" class="btn btn--gold">Create First Item</a>
             </div>
         </div>
     }
@@ -40,7 +40,7 @@
             <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;padding:18px 18px 0;">
                 <div style="flex:1;min-width:200px;position:relative;">
                     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-soft);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                    <input id="search-input" type="text" placeholder="Search by ID, client, project..." style="width:100%;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:var(--radius-lg);font-size:0.9rem;outline:none;background:var(--white);" oninput="filterTable()" />
+                    <input id="search-input" type="text" placeholder="Search by name, material..." style="width:100%;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:var(--radius-lg);font-size:0.9rem;outline:none;background:var(--white);" oninput="filterTable()" />
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--ink-soft);">
                     <span>Show</span>
@@ -57,32 +57,33 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Quote ID</th>
-                            <th>Client</th>
-                            <th>Project</th>
-                            <th>Description</th>
-                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Material</th>
+                            <th>Price (Rate)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        @foreach (var q in Model)
+                        @foreach (var item in Model)
                         {
                             <tr>
-                                <td><code style="font-size:.8rem;background:var(--cream-2);padding:3px 8px;border-radius:6px;">#@q.Id</code></td>
-                                <td>
-                                    <strong style="color:var(--ink);display:block;">@q.ClientName</strong>
-                                    <small>@(string.IsNullOrEmpty(q.ClientPhone) ? "N/A" : q.ClientPhone)</small>
-                                </td>
-                                <td>@q.ProjectType</td>
-                                <td style="max-width:160px;white-space:normal;color:var(--ink-soft);font-size:.82rem;">@(q.Scope?.Length > 60 ? q.Scope[..60] + "…" : q.Scope)</td>
-                                <td>@q.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td><strong style="color:var(--ink);">@item.Name</strong></td>
+                                <td>@(string.IsNullOrEmpty(item.Material) ? "\u2014" : item.Material)</td>
+                                <td style="font-family:var(--font-serif);font-weight:600;color:var(--gold-deep);">&#x20B9; @item.Rate.ToString("N2")</td>
                                 <td>
                                     <div class="actions">
-                                        <a href="/Quote/Edit/@q.Id" class="btn-sm btn-edit">View</a>
-                                        <form action="/Quote/Delete/@q.Id" method="post" style="margin:0">
+                                        <a href="/Items/Edit?name=@Uri.EscapeDataString(item.Name)&material=@Uri.EscapeDataString(item.Material)" class="btn-sm btn-edit">Edit</a>
+                                        <form action="/Items/Copy" method="post" style="display:inline;margin:0;">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn-sm btn-delete">Delete</button>
+                                            <input type="hidden" name="name" value="@item.Name" />
+                                            <input type="hidden" name="material" value="@item.Material" />
+                                            <button type="submit" class="btn-sm" style="background:rgba(0,0,0,.04);color:var(--ink);">Copy</button>
+                                        </form>
+                                        <form action="/Items/Delete" method="post" style="display:inline;margin:0;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="name" value="@item.Name" />
+                                            <input type="hidden" name="material" value="@item.Material" />
+                                            <button type="submit" class="btn-sm btn-delete" onclick="return confirm('Delete item &quot;@item.Name&quot;?')">Delete</button>
                                         </form>
                                     </div>
                                 </td>
@@ -144,7 +145,7 @@
 
                 var from = totalMatched === 0 ? 0 : start + 1;
                 var to = Math.min(end, totalMatched);
-                infoEl.textContent = 'Showing ' + from + '\u2013' + to + ' of ' + totalMatched + ' quote' + (totalMatched !== 1 ? 's' : '');
+                infoEl.textContent = 'Showing ' + from + '\u2013' + to + ' of ' + totalMatched + ' item' + (totalMatched !== 1 ? 's' : '');
 
                 renderButtons();
             }
@@ -154,7 +155,7 @@
                 if (totalPages <= 1 && pageSize > 0) {
                     var from = totalMatched === 0 ? 0 : 1;
                     var to = Math.min(pageSize, totalMatched);
-                    infoEl.textContent = 'Showing ' + from + '\u2013' + to + ' of ' + totalMatched + ' quote' + (totalMatched !== 1 ? 's' : '');
+                    infoEl.textContent = 'Showing ' + from + '\u2013' + to + ' of ' + totalMatched + ' item' + (totalMatched !== 1 ? 's' : '');
                     return;
                 }
 

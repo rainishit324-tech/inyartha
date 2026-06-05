@@ -1,0 +1,133 @@
+@model ItemTemplate
+@{
+    ViewData["Title"] = "Edit item";
+}
+
+<style>
+    .ipg { max-width: 880px; margin: 0 auto; padding: calc(var(--nav-h) + 32px) 40px 80px; }
+    .ipg__topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .ipg__back { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 0.9rem; text-decoration: none; transition: color .2s; }
+    .ipg__back:hover { color: var(--gold-deep); }
+    .ipg__card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 24px rgba(138,109,63,.07); overflow: hidden; }
+    .ipg__head { padding: 32px 40px 24px; }
+    .ipg__tag { display: inline-block; padding: 5px 14px; border: 1px solid var(--gold); color: var(--gold-deep); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 999px; margin-bottom: 14px; }
+    .ipg__title { font-family: var(--font-serif); font-size: 2rem; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+    .ipg__sub { color: var(--ink-soft); font-size: 0.92rem; margin: 0; }
+    .ipg__body { padding: 8px 40px 32px; }
+    .ipg__row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 28px; }
+    .ipg__row--full { grid-template-columns: 1fr; }
+    .ipg__field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 22px; }
+    .ipg__field label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
+    .ipg__field label .req { color: #c0392b; }
+    .ipg__field input, .ipg__field select, .ipg__field textarea {
+        font-family: var(--font-sans);
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--ink);
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .ipg__field input:focus, .ipg__field select:focus, .ipg__field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,153,104,.15); }
+    .ipg__field textarea { min-height: 110px; resize: vertical; }
+    .ipg__hint { font-size: 0.78rem; color: var(--ink-soft); margin-top: 2px; }
+    .ipg__foot { padding: 20px 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .ipg__foot-right { display: flex; gap: 10px; align-items: center; }
+    .ipg__btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; cursor: pointer; border: 1px solid transparent; background: var(--white); color: var(--ink); transition: transform .2s, box-shadow .2s, background .2s; text-decoration: none; }
+    .ipg__btn:hover { transform: translateY(-1px); }
+    .ipg__btn--cancel { background: var(--white); color: var(--ink); border-color: var(--line); }
+    .ipg__btn--save { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(138,109,63,.25); }
+    .ipg__btn--save:hover { box-shadow: 0 6px 24px rgba(138,109,63,.35); }
+    .ipg__btn--delete { background: var(--white); color: #1a1410; border-color: var(--line); }
+    .ipg__btn--delete:hover { background: rgba(220,53,69,.06); border-color: rgba(220,53,69,.3); }
+    @@media (max-width: 720px) {
+        .ipg__row { grid-template-columns: 1fr; gap: 0; }
+        .ipg__head, .ipg__body, .ipg__foot { padding-left: 24px; padding-right: 24px; }
+    }
+</style>
+
+<div class="ipg">
+    <div class="ipg__topbar">
+        <a href="/Items" class="ipg__back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+            Back to items
+        </a>
+        <span class="ipg__tag" style="margin-bottom:0;">Admin Panel</span>
+    </div>
+
+    <div class="ipg__card">
+        <form method="post" asp-action="Edit">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="originalName" value="@ViewBag.OriginalName" />
+            <input type="hidden" name="originalMaterial" value="@ViewBag.OriginalMaterial" />
+
+            <div class="ipg__head">
+                <span class="ipg__tag">Manage Items</span>
+                <h1 class="ipg__title">Edit item</h1>
+                <p class="ipg__sub">Update the template details below</p>
+            </div>
+
+            <div class="ipg__body">
+                <div asp-validation-summary="All" class="text-danger" style="font-size:.85rem;margin-bottom:16px;"></div>
+
+                <div class="ipg__row">
+                    <div class="ipg__field">
+                        <label asp-for="Name">Item name <span class="req">*</span></label>
+                        <input asp-for="Name" placeholder="e.g. Kitchen Base" autocomplete="off" required />
+                    </div>
+                    <div class="ipg__field">
+                        <label asp-for="Material">Material <span class="req">*</span></label>
+                        <input asp-for="Material" placeholder="e.g. BWP Plywood" autocomplete="off" required />
+                    </div>
+                </div>
+
+                <div class="ipg__row">
+                    <div class="ipg__field">
+                        <label asp-for="Rate">Rate <span class="req">*</span></label>
+                        <input asp-for="Rate" type="number" step="0.01" min="0" placeholder="e.g. 1600" required />
+                        <span class="ipg__hint">Price in INR</span>
+                    </div>
+                    <div class="ipg__field">
+                        <label asp-for="PricingUnit">Pricing unit</label>
+                        <select asp-for="PricingUnit">
+                            <option value="Per sq ft">Per sq ft</option>
+                            <option value="Lump sum">Lump sum</option>
+                            <option value="Per running ft">Per running ft</option>
+                            <option value="Per unit">Per unit</option>
+                        </select>
+                        <span class="ipg__hint">How this item is measured</span>
+                    </div>
+                </div>
+
+                <div class="ipg__row ipg__row--full">
+                    <div class="ipg__field">
+                        <label asp-for="Description">Description</label>
+                        <textarea asp-for="Description" placeholder="Optional &mdash; appears in client-facing quotes"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ipg__foot">
+                <button type="button" class="ipg__btn ipg__btn--delete" onclick="if(confirm('Delete this item?')) { document.getElementById('delete-form').submit(); }">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    Delete item
+                </button>
+                <div class="ipg__foot-right">
+                    <a href="/Items" class="ipg__btn ipg__btn--cancel">Cancel</a>
+                    <button type="submit" class="ipg__btn ipg__btn--save">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Save changes
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <form id="delete-form" action="/Items/Delete" method="post" style="display:none;">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="name" value="@ViewBag.OriginalName" />
+            <input type="hidden" name="material" value="@ViewBag.OriginalMaterial" />
+        </form>
+    </div>
+</div>
